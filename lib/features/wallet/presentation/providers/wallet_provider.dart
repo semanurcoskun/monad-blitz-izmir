@@ -81,7 +81,6 @@ class WalletNotifier extends Notifier<WalletState> {
     
     // Don't auto-resume checkPendingSession, just let the user press the button
     // But we can check if address was already restored by _walletService.init()
-    /*
     if (_walletService.isConnected) {
       final balance = await _walletService.getBalance();
       state = WalletState(
@@ -93,7 +92,6 @@ class WalletNotifier extends Notifier<WalletState> {
     } else {
       state = const WalletState(status: WalletConnectionStatus.disconnected);
     }
-    */
   }
 
   /// Connect wallet via MetaMask
@@ -157,16 +155,23 @@ class WalletNotifier extends Notifier<WalletState> {
 
     debugPrint('WalletNotifier: App resumed, starting session check loop...');
     
-    // Try up to 5 times (total ~10 seconds)
-    for (int i = 0; i < 5; i++) {
+    // Try up to 8 times (total ~16 seconds)
+    for (int i = 0; i < 8; i++) {
       debugPrint('WalletNotifier: Session check attempt ${i + 1}...');
       
-      // Refresh state
-      await _walletService.init();
+      // Use the lightweight check instead of full init()
+      final found = await _walletService.checkActiveSessions();
       
-      if (_walletService.isConnected) {
+      if (found && _walletService.isConnected) {
         debugPrint('WalletNotifier: Found active session on attempt ${i + 1}!');
-        // ... navigation happens through ref.listen
+        final balance = await _walletService.getBalance();
+        
+        state = WalletState(
+          status: WalletConnectionStatus.connected,
+          address: _walletService.connectedAddress,
+          shortenedAddress: _walletService.shortenedAddress,
+          balance: balance,
+        );
         return;
       }
       

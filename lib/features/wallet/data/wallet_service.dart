@@ -115,61 +115,73 @@ class WalletService {
   }
 
   /// Attempt to restore a previously saved session
-  Future<void> _restoreSession() async {
-    if (_web3app == null) return;
+  Future<bool> _restoreSession() async {
+    if (_web3app == null) return false;
 
     final sessions = _web3app!.getActiveSessions();
-    final pairings = _web3app!.pairings.getAll();
     
-    debugPrint('WalletService: Active sessions: ${sessions.length}');
-    debugPrint('WalletService: Active pairings: ${pairings.length}');
-    
-    for (var pairing in pairings) {
-      debugPrint('WalletService: Pairing topic: ${pairing.topic}, Active: ${pairing.active}');
-    }
-
     if (sessions.isNotEmpty) {
       _session = sessions.values.first;
       _extractAddress();
       debugPrint('WalletService: Restored active session for $_connectedAddress');
+      
+      // Cache the address
+      if (_connectedAddress != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_savedAddressKey, _connectedAddress!);
+      }
+      return true;
     } else {
-      // Try to get saved address from local storage
+      // Try to get saved address from local storage as fallback
       final prefs = await SharedPreferences.getInstance();
       _connectedAddress = prefs.getString(_savedAddressKey);
       if (_connectedAddress != null) {
         debugPrint('WalletService: Found cached address from prefs (no active session): $_connectedAddress');
+        return true;
       }
     }
+    return false;
+  }
+
+  /// Lightweight check for active sessions without re-initializing everything
+  Future<bool> checkActiveSessions() async {
+    if (_web3app == null) return false;
+    
+    // Just refresh the active session list
+    return await _restoreSession();
   }
 
   /// Start connection flow and return the ConnectResponse for async tracking.
   /// This launches MetaMask but does NOT wait for session approval.
   Future<ConnectResponse?> connectAndGetResponse() async {
+    // 1. Ensure relay is active and connected
     if (_web3app == null) await init();
+    await waitForRelay();
 
     try {
-      debugPrint('WalletService: Creating connection request (with 10s timeout)...');
+      debugPrint('WalletService: Creating connection request...');
       
       // Set pending flag in storage before launching MetaMask
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_pendingConnectionKey, true);
 
+      // Using optionalNamespaces instead of requiredNamespaces.
+      // This is more robust as it allows the wallet to connect even if it
+      // doesn't "know" the Monad chain yet.
       final ConnectResponse response = await _web3app!.connect(
-        requiredNamespaces: {
+        optionalNamespaces: {
           MonadConfig.namespace: const RequiredNamespace(
-            chains: [MonadConfig.chainRef],
-            methods: ['personal_sign'],
+            chains: ['eip155:1', MonadConfig.chainRef], // Ethereum Mainnet fallback + Monad
+            methods: [
+              'eth_sendTransaction', 
+              'eth_signTransaction', 
+              'personal_sign', 
+              'eth_signTypedData'
+            ],
             events: ['chainChanged', 'accountsChanged'],
           ),
         },
-        optionalNamespaces: {
-          MonadConfig.namespace: const RequiredNamespace(
-            chains: [MonadConfig.chainRef],
-            methods: ['eth_sendTransaction', 'eth_signTypedData'],
-            events: [],
-          ),
-        },
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 15));
 
       // Launch MetaMask
       final uri = response.uri;
