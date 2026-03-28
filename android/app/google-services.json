@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "991987548743",
+    "project_id": "mobile-blockchain-system",
+    "storage_bucket": "mobile-blockchain-system.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:991987548743:android:c4af3ec7d1b1f886a82762",
+        "android_client_info": {
+          "package_name": "com.example.yeni_flutter_projesi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDN9oO1S48Yur09ElOwYnAr1i0fyeWItYE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
