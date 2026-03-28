@@ -1,0 +1,320 @@
+﻿Reading CSV (first 5000 rows)...
+Uploading to 'routes' collection...
+python : Traceback (most
+ recent call last):
+At line:1 char:1
++ python scripts/seed_fi
+restore.py 2>&1 | Out-Fi
+le -FilePath scripts/er 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo      
+        : NotSpecified  
+  : (Traceback (most    
+ recent call last)::    
+String) [], RemoteE    x
+ception
+    + FullyQualifiedErr 
+   orId : NativeComman  
+  dError
+ 
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\api_core
+\grpc_helpers.py", line 
+55, in error_remapped_ca
+llable
+    return callable_(*ar
+gs, **kwargs)
+           ^^^^^^^^^^^^^
+^^^^^^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\grpc\_intercept
+or.py", line 276, in __c
+all__
+    response, ignored_ca
+ll = self._with_call(
+                        
+     ^^^^^^^^^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\grpc\_intercept
+or.py", line 331, in _wi
+th_call
+    return call.result()
+, call
+           ^^^^^^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\grpc\_channel.p
+y", line 438, in result
+    raise self
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\grpc\_intercept
+or.py", line 314, in con
+tinuation
+    response, call = sel
+f._thunk(new_method).wit
+h_call(
+                     ^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\grpc\_channel.p
+y", line 1173, in with_c
+all
+    return _end_unary_re
+sponse_blocking(state, c
+all, True, None)
+           ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\grpc\_channel.p
+y", line 990, in _end_un
+ary_response_blocking
+    raise _InactiveRpcEr
+ror(state)  # pytype: di
+sable=not-instantiable
+    ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+grpc._channel._InactiveR
+pcError: <_InactiveRpcEr
+ror of RPC that terminat
+ed with:
+	status = StatusCode.PER
+MISSION_DENIED
+	details = "Cloud Firest
+ore API has not been use
+d in project mobile-bloc
+kchain-system before or 
+it is disabled. Enable i
+t by visiting https://co
+nsole.developers.google.
+com/apis/api/firestore.g
+oogleapis.com/overview?p
+roject=mobile-blockchain
+-system then retry. If y
+ou enabled this API rece
+ntly, wait a few minutes
+ for the action to propa
+gate to our systems and 
+retry."
+	debug_error_string = "U
+NKNOWN:Error received fr
+om peer ipv4:142.251.38.
+234:443 {grpc_status:7, 
+grpc_message:"Cloud Fire
+store API has not been u
+sed in project mobile-bl
+ockchain-system before o
+r it is disabled. Enable
+ it by visiting https://
+console.developers.googl
+e.com/apis/api/firestore
+.googleapis.com/overview
+?project=mobile-blockcha
+in-system then retry. If
+ you enabled this API re
+cently, wait a few minut
+es for the action to pro
+pagate to our systems an
+d retry."}"
+>
+
+The above exception was 
+the direct cause of the 
+following exception:
+
+Traceback (most recent c
+all last):
+  File "C:\Users\iemir\.
+gemini\antigravity\scrat
+ch\mobile\scripts\seed_f
+irestore.py", line 79, i
+n <module>
+    seed_data()
+  File "C:\Users\iemir\.
+gemini\antigravity\scrat
+ch\mobile\scripts\seed_f
+irestore.py", line 67, i
+n seed_data
+    batch.commit()
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\cloud\fi
+restore_v1\batch.py", li
+ne 63, in commit
+    commit_response = se
+lf._client._firestore_ap
+i.commit(
+                      ^^
+^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\cloud\fi
+restore_v1\services\fire
+store\client.py", line 1
+451, in commit
+    response = rpc(
+               ^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\api_core
+\gapic_v1\method.py", li
+ne 128, in __call__
+    return wrapped_func(
+*args, **kwargs)
+           ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\api_core
+\retry\retry_unary.py", 
+line 294, in retry_wrapp
+ed_func
+    return retry_target(
+           ^^^^^^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\api_core
+\retry\retry_unary.py", 
+line 156, in retry_targe
+t
+    next_sleep = _retry_
+error_helper(
+                 ^^^^^^^
+^^^^^^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\api_core
+\retry\retry_base.py", l
+ine 216, in _retry_error
+_helper
+    raise final_exc from
+ source_exc
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\api_core
+\retry\retry_unary.py", 
+line 147, in retry_targe
+t
+    result = target()
+             ^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\api_core
+\timeout.py", line 130, 
+in func_with_timeout
+    return func(*args, *
+*kwargs)
+           ^^^^^^^^^^^^^
+^^^^^^^^
+  File "C:\Users\iemir\A
+ppData\Local\Programs\Py
+thon\Python311\Lib\site-
+packages\google\api_core
+\grpc_helpers.py", line 
+57, in error_remapped_ca
+llable
+    raise exceptions.fro
+m_grpc_error(exc) from e
+xc
+google.api_core.exceptio
+ns.PermissionDenied: 403
+ Cloud Firestore API has
+ not been used in projec
+t mobile-blockchain-syst
+em before or it is disab
+led. Enable it by visiti
+ng https://console.devel
+opers.google.com/apis/ap
+i/firestore.googleapis.c
+om/overview?project=mobi
+le-blockchain-system the
+n retry. If you enabled 
+this API recently, wait 
+a few minutes for the ac
+tion to propagate to our
+ systems and retry. [rea
+son: "SERVICE_DISABLED"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "firestore.goog
+leapis.com"
+}
+metadata {
+  key: "serviceTitle"
+  value: "Cloud Firestor
+e API"
+}
+metadata {
+  key: "containerInfo"
+  value: "mobile-blockch
+ain-system"
+}
+metadata {
+  key: "consumer"
+  value: "projects/mobil
+e-blockchain-system"
+}
+metadata {
+  key: "activationUrl"
+  value: "https://consol
+e.developers.google.com/
+apis/api/firestore.googl
+eapis.com/overview?proje
+ct=mobile-blockchain-sys
+tem"
+}
+, locale: "en-US"
+message: "Cloud Firestor
+e API has not been used 
+in project mobile-blockc
+hain-system before or it
+ is disabled. Enable it 
+by visiting https://cons
+ole.developers.google.co
+m/apis/api/firestore.goo
+gleapis.com/overview?pro
+ject=mobile-blockchain-s
+ystem then retry. If you
+ enabled this API recent
+ly, wait a few minutes f
+or the action to propaga
+te to our systems and re
+try."
+, links {
+  description: "Google d
+evelopers console API ac
+tivation"
+  url: "https://console.
+developers.google.com/ap
+is/api/firestore.googlea
+pis.com/overview?project
+=mobile-blockchain-syste
+m"
+}
+]

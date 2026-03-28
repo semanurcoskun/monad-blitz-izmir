@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'features/wallet/presentation/pages/connect_wallet_page.dart';
 import 'features/navigation/presentation/pages/main_navigation_page.dart';
-import 'features/routes/presentation/pages/route_results_page.dart';
 import 'features/checkout/presentation/pages/checkout_page.dart';
 import 'core/theme/app_theme.dart';
 
@@ -26,7 +25,6 @@ class KineticTravelApp extends StatelessWidget {
       routes: {
         '/connect': (context) => const ConnectWalletPage(),
         '/': (context) => const MainNavigationPage(),
-        '/routes': (context) => const RouteResultsPage(),
         '/checkout': (context) => const CheckoutPage(),
       },
     );
