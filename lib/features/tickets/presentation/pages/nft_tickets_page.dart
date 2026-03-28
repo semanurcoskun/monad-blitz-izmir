@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeni_flutter_projesi/core/theme/app_colors.dart';
 import 'package:yeni_flutter_projesi/core/widgets/kinetic_card.dart';
+import 'package:yeni_flutter_projesi/features/wallet/presentation/providers/wallet_provider.dart';
 
-class NftTicketsPage extends StatelessWidget {
+class NftTicketsPage extends ConsumerWidget {
   const NftTicketsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final walletState = ref.watch(walletProvider);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -14,7 +17,7 @@ class NftTicketsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(),
+              _buildHeader(walletState),
               const SizedBox(height: 32),
               _buildInventoryStats(context),
               const SizedBox(height: 24),
@@ -46,7 +49,7 @@ class NftTicketsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(WalletState walletState) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -64,9 +67,9 @@ class NftTicketsPage extends StatelessWidget {
             color: AppColors.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Text(
-            '0x12...34',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          child: Text(
+            walletState.shortenedAddress ?? '0x...',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           ),
         ),
       ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeni_flutter_projesi/core/theme/app_colors.dart';
 import 'package:yeni_flutter_projesi/features/search/presentation/pages/search_page.dart';
 import 'package:yeni_flutter_projesi/features/tickets/presentation/pages/nft_tickets_page.dart';
+import 'package:yeni_flutter_projesi/features/wallet/presentation/pages/wallet_page.dart';
 
 // Provider for the current navigation index
 final navigationIndexProvider = NotifierProvider<NavigationNotifier, int>(
@@ -25,8 +26,8 @@ class MainNavigationPage extends ConsumerWidget {
     final List<Widget> pages = [
       const SearchPage(),
       const NftTicketsPage(),
-      // Adding a dummy Wallet/Events page for now
-      const Scaffold(body: Center(child: Text('Wallet & Staking'))),
+      // Wallet page with real wallet info
+      const WalletPage(),
     ];
 
     return Scaffold(

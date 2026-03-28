@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeni_flutter_projesi/core/theme/app_colors.dart';
 import 'package:yeni_flutter_projesi/core/widgets/kinetic_card.dart';
+import 'package:yeni_flutter_projesi/features/wallet/presentation/providers/wallet_provider.dart';
 
-class SearchPage extends StatelessWidget {
+class SearchPage extends ConsumerWidget {
   const SearchPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final walletState = ref.watch(walletProvider);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -16,7 +19,7 @@ class SearchPage extends StatelessWidget {
             children: [
               _buildHeader(),
               const SizedBox(height: 40),
-              _buildHeroSection(context),
+              _buildHeroSection(context, walletState),
               const SizedBox(height: 40),
               _buildSearchCard(context),
               const SizedBox(height: 40),
@@ -53,7 +56,7 @@ class SearchPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeroSection(BuildContext context) {
+  Widget _buildHeroSection(BuildContext context, WalletState walletState) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -84,7 +87,7 @@ class SearchPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '1,240.50 MON',
+                    '${walletState.balance.toStringAsFixed(2)} MON',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,

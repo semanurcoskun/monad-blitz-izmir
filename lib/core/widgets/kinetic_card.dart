@@ -26,7 +26,7 @@ class KineticCard extends StatelessWidget {
         boxShadow: hasAmbientShadow
             ? [
                 BoxShadow(
-                  color: AppColors.onSurface.withOpacity(0.04),
+                  color: AppColors.onSurface.withValues(alpha: 0.04),
                   blurRadius: 40,
                   offset: const Offset(0, 4),
                 ),
