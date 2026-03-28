@@ -1,15 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeni_flutter_projesi/core/theme/app_colors.dart';
 import 'package:yeni_flutter_projesi/core/widgets/kinetic_card.dart';
+import 'package:yeni_flutter_projesi/core/services/firebase_service.dart';
+import 'package:yeni_flutter_projesi/features/wallet/presentation/providers/wallet_provider.dart';
 
-class RouteResultsPage extends StatelessWidget {
-  const RouteResultsPage({super.key});
+class RouteResultsPage extends ConsumerWidget {
+  final String from;
+  final String to;
+  final List<Map<String, dynamic>> routes;
+
+  const RouteResultsPage({
+    super.key,
+    required this.from,
+    required this.to,
+    required this.routes,
+  });
+
+  Future<void> _purchaseTicket(BuildContext context, WidgetRef ref, Map<String, dynamic> route) async {
+    final walletState = ref.read(walletProvider);
+    
+    if (!walletState.isConnected || walletState.address == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please connect your wallet first!')),
+      );
+      return;
+    }
+
+    final String walletAddress = walletState.address!;
+    
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final ticketData = {
+        'from': from,
+        'to': to,
+        'airline': route['Airline'],
+        'flightCode': route['Flight_code'],
+        'departure': route['Departure'],
+        'arrival': route['Arrival'],
+        'fare': route['Fare'],
+        'duration': route['Duration_in_hours'],
+        'status': 'VERIFIED',
+        'type': 'FLIGHT',
+        'seat': '12A', // Mock seat
+      };
+
+      await FirebaseService().saveTicketToUserHistory(walletAddress, ticketData);
+      
+      if (!context.mounted) return;
+      Navigator.pop(context); // Close loading
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ticket purchased successfully! Check your Inventory.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pop(context); // Close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('London (LHR) -> Paris (CDG)'),
+        title: Text('$from -> $to'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -19,41 +85,41 @@ class RouteResultsPage extends StatelessWidget {
         children: [
           _buildFilters(),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                _buildRouteCard(
-                  context,
-                  departure: '08:45',
-                  arrival: '10:15',
-                  price: '240.50',
-                  duration: '1h 30m',
-                  type: 'FLIGHT',
-                  isFastest: true,
-                  isMonad: true,
-                ),
-                const SizedBox(height: 16),
-                _buildRouteCard(
-                  context,
-                  departure: '12:30',
-                  arrival: '14:00',
-                  price: '215.10',
-                  duration: '1h 30m',
-                  type: 'FLIGHT',
-                  isMonad: true,
-                ),
-                const SizedBox(height: 16),
-                _buildRouteCard(
-                  context,
-                  departure: '09:00',
-                  arrival: '16:45',
-                  price: '45.00',
-                  duration: '7h 45m',
-                  type: 'BUS',
-                  isMonad: false,
-                ),
-              ],
-            ),
+            child: routes.isEmpty
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.search_off, size: 48, color: AppColors.onSurfaceVariant),
+                        SizedBox(height: 16),
+                        Text('No routes found for this selection.'),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(24),
+                    itemCount: routes.length,
+                    itemBuilder: (context, index) {
+                      final route = routes[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: _buildRouteCard(
+                          context,
+                          ref: ref,
+                          route: route,
+                          airline: route['Airline'] ?? 'Unknown',
+                          flightCode: route['Flight_code'] ?? '',
+                          departure: route['Departure'] ?? '--:--',
+                          arrival: route['Arrival'] ?? '--:--',
+                          price: (route['Fare'] ?? 0.0).toStringAsFixed(2),
+                          duration: '${route['Duration_in_hours'] ?? '?'}h',
+                          type: 'FLIGHT',
+                          isFastest: index == 0,
+                          isMonad: true,
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -98,6 +164,10 @@ class RouteResultsPage extends StatelessWidget {
 
   Widget _buildRouteCard(
     BuildContext context, {
+    required WidgetRef ref,
+    required Map<String, dynamic> route,
+    required String airline,
+    required String flightCode,
     required String departure,
     required String arrival,
     required String price,
@@ -113,27 +183,52 @@ class RouteResultsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isFastest)
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text(
-                'FASTEST ROUTE',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildTimeNode(departure, 'LHR'),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    airline.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  Text(
+                    flightCode,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              if (isFastest)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'FASTEST ROUTE',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildTimeNode(departure, from),
               Column(
                 children: [
                   Text(
@@ -159,7 +254,7 @@ class RouteResultsPage extends StatelessWidget {
                   ),
                 ],
               ),
-              _buildTimeNode(arrival, 'CDG'),
+              _buildTimeNode(arrival, to),
             ],
           ),
           const SizedBox(height: 24),
@@ -177,7 +272,7 @@ class RouteResultsPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$price MONAD',
+                    '\$$price MON',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -186,7 +281,7 @@ class RouteResultsPage extends StatelessWidget {
                 ],
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () => _purchaseTicket(context, ref, route),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: brandColor,
                   shape: RoundedRectangleBorder(

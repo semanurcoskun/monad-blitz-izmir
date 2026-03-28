@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeni_flutter_projesi/core/theme/app_colors.dart';
 import 'package:yeni_flutter_projesi/core/widgets/kinetic_card.dart';
 import 'package:yeni_flutter_projesi/features/wallet/presentation/providers/wallet_provider.dart';
+import 'package:yeni_flutter_projesi/features/tickets/presentation/providers/tickets_provider.dart';
 
 class NftTicketsPage extends ConsumerWidget {
   const NftTicketsPage({super.key});
@@ -10,41 +11,78 @@ class NftTicketsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final walletState = ref.watch(walletProvider);
+    final ticketsAsync = ref.watch(userTicketsProvider);
+
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(walletState),
-              const SizedBox(height: 32),
-              _buildInventoryStats(context),
-              const SizedBox(height: 24),
-              _buildTicketCard(
-                context,
-                id: 'MN-0025-A2',
-                from: 'IST',
-                to: 'ANK',
-                seat: '12A',
-                type: 'FLIGHT',
-                isMonad: true,
-              ),
-              const SizedBox(height: 16),
-              _buildTicketCard(
-                context,
-                id: 'OB-9912-B1',
-                from: 'PAR',
-                to: 'LDN',
-                seat: '4B',
-                type: 'BUS',
-                isMonad: false,
-              ),
-              const SizedBox(height: 32),
-              _buildExploreDestinations(context),
-            ],
+        child: RefreshIndicator(
+          onRefresh: () => ref.refresh(userTicketsProvider.future),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(walletState),
+                const SizedBox(height: 32),
+                ticketsAsync.when(
+                  data: (tickets) => _buildInventoryStats(context, tickets.length),
+                  loading: () => const _StatPlaceholder(),
+                  error: (_, __) => _buildInventoryStats(context, 0),
+                ),
+                const SizedBox(height: 24),
+                ticketsAsync.when(
+                  data: (tickets) {
+                    if (tickets.isEmpty) {
+                      return _buildEmptyState();
+                    }
+                    return Column(
+                      children: tickets.map((ticket) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: _buildTicketCard(
+                            context,
+                            id: ticket['id'].toString().substring(0, 8).toUpperCase(),
+                            from: ticket['from'] ?? '???',
+                            to: ticket['to'] ?? '???',
+                            seat: ticket['seat'] ?? '12A',
+                            type: ticket['type'] ?? 'FLIGHT',
+                            isMonad: true,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (err, _) => Center(child: Text('Error: $err')),
+                ),
+                const SizedBox(height: 32),
+                _buildExploreDestinations(context),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return KineticCard(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        children: [
+          Icon(Icons.airplane_ticket_outlined, size: 48, color: AppColors.outlineVariant),
+          const SizedBox(height: 16),
+          const Text(
+            'No tickets yet',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Text(
+            'Your purchased tickets will appear here.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }
@@ -76,7 +114,7 @@ class NftTicketsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildInventoryStats(BuildContext context) {
+  Widget _buildInventoryStats(BuildContext context, int total) {
     return Row(
       children: [
         Column(
@@ -86,7 +124,10 @@ class NftTicketsPage extends ConsumerWidget {
               'Total Assets',
               style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
             ),
-            Text('03', style: Theme.of(context).textTheme.headlineMedium),
+            Text(
+              total.toString().padLeft(2, '0'),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
           ],
         ),
         const Spacer(),
@@ -98,7 +139,7 @@ class NftTicketsPage extends ConsumerWidget {
               style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
             ),
             const Text(
-              'Monad Mainnet',
+              'Monad Testnet',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
@@ -124,7 +165,7 @@ class NftTicketsPage extends ConsumerWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             color: brandColor.withValues(alpha: 0.05),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -135,7 +176,7 @@ class NftTicketsPage extends ConsumerWidget {
                       type == 'FLIGHT'
                           ? Icons.airplanemode_active
                           : Icons.directions_bus,
-                      size: 16,
+                      size: 14,
                       color: brandColor,
                     ),
                     const SizedBox(width: 8),
@@ -150,7 +191,7 @@ class NftTicketsPage extends ConsumerWidget {
                   ],
                 ),
                 Text(
-                  id,
+                  'ID: $id',
                   style: const TextStyle(
                     fontSize: 10,
                     color: AppColors.onSurfaceVariant,
@@ -166,16 +207,16 @@ class NftTicketsPage extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildRouteNode(from, 'Istanbul'),
+                    _buildRouteNode(from, ''),
                     Icon(
                       Icons.arrow_forward,
                       color: AppColors.outlineVariant,
                       size: 20,
                     ),
-                    _buildRouteNode(to, 'Ankara', isEnd: true),
+                    _buildRouteNode(to, '', isEnd: true),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -184,7 +225,7 @@ class NftTicketsPage extends ConsumerWidget {
                     _buildTicketInfo('STATUS', 'VERIFIED', isVerified: true),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
@@ -200,7 +241,7 @@ class NftTicketsPage extends ConsumerWidget {
                         ),
                         child: Text(
                           'VIEW EXPLORER',
-                          style: TextStyle(color: brandColor, fontSize: 12),
+                          style: TextStyle(color: brandColor, fontSize: 11),
                         ),
                       ),
                     ),
@@ -213,11 +254,10 @@ class NftTicketsPage extends ConsumerWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 0),
                         ),
                         child: const Text(
-                          'DOWNLOAD PASS',
-                          style: TextStyle(fontSize: 12),
+                          'PASS',
+                          style: TextStyle(fontSize: 11),
                         ),
                       ),
                     ),
@@ -241,13 +281,14 @@ class NftTicketsPage extends ConsumerWidget {
           code,
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        Text(
-          city,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.onSurfaceVariant,
+        if (city.isNotEmpty)
+          Text(
+            city,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.onSurfaceVariant,
+            ),
           ),
-        ),
       ],
     );
   }
@@ -315,6 +356,20 @@ class NftTicketsPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StatPlaceholder extends StatelessWidget {
+  const _StatPlaceholder();
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(width: 40, height: 30, color: AppColors.surfaceContainer),
+        const Spacer(),
+        Container(width: 80, height: 30, color: AppColors.surfaceContainer),
+      ],
     );
   }
 }
