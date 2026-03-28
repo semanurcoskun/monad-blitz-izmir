@@ -22,7 +22,7 @@ class KineticTravelApp extends StatelessWidget {
       title: 'The Kinetic Ledger',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      initialRoute: '/',
+      initialRoute: '/connect',
       routes: {
         '/connect': (context) => const ConnectWalletPage(),
         '/': (context) => const MainNavigationPage(),
