@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import argparse
 import numpy as np
 import pandas as pd
@@ -71,6 +71,18 @@ flight_df = load_and_clean_data()
 @app.get("/")
 def home():
     return {"message": "Uçuş API Çalışıyor. Dokümantasyon için /docs adresine gidin."}
+
+
+@app.post("/api/purchases/from-marketplace")
+def purchase_not_available_on_flights_api():
+    # This server is only for flight search data; purchase runs on Node backend.
+    raise HTTPException(
+        status_code=501,
+        detail=(
+            "Satın alma endpoint'i bu serviste yok. "
+            "Purchase için backend'i http://127.0.0.1:3000 adresinde kullanın."
+        ),
+    )
 
 
 # 2. Uçuşları Listeleme, Gelişmiş Filtreleme ve Sıralama
